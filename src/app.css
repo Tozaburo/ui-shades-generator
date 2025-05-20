@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+  font-family: "Montserrat", sans-serif;
+  line-height: 1.5;
+}
+
+:root {
+  --color-100: oklch(0.9 0 0);
+  --color-200: oklch(0.84 0 0);
+  --color-300: oklch(0.76 0 0);
+  --color-400: oklch(0.67 0 0);
+  --color-500: oklch(0.56 0 0);
+  --color-600: oklch(0.46 0 0);
+  --color-700: oklch(0.34 0 0);
+  --color-800: oklch(0.22 0 0);
+  --color-900: oklch(0.1 0 0);
+}
+
+/* #3dda88 */
+
+input[type=range] {
+  accent-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #bababa;
+  height: 0.2vmin;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+
+  &:active {
+    background: var(--color-400);
+  }
+
+  &:focus,
+  &:active {
+    outline: none;
+  }
+
+  &::-ms-track {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: block;
+    border: 2px solid #bababa;
+    background-color: #fff;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+
+    transition: border, transform 0.2s ease-in-out;
+  }
+
+  &:active::-webkit-slider-thumb {
+    border: 2px solid var(--color-400);
+    transform: scale(1.1);
+  }
+}
