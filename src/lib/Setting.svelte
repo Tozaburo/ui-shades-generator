@@ -6,6 +6,7 @@
         basicToString,
         toBasic,
         isValidColor,
+        isValidChroma,
     } from "./colors";
     import {
         defaultSetting,
@@ -99,7 +100,9 @@
             defaultSetting.showColorValue,
         ];
 
-        const data: string = [...defaultSettingData, ...settingsData].map(data => encodeURIComponent(data)).join(",");
+        const data: string = [...defaultSettingData, ...settingsData]
+            .map((data) => encodeURIComponent(data))
+            .join(",");
 
         updateQueryParam("settings", data);
     }
@@ -164,20 +167,32 @@
             }}
             class={settingMode === "other" ? "selected" : ""}>Other</button
         >
+
+        <button
+            onclick={() => {
+                settingMode = "oklch";
+            }}
+            class={settingMode === "oklch" ? "selected" : ""}>OKLCH</button
+        >
     </div>
     <div class="setting flexB flexC {settingMode}">
         {#if settingMode === "basic"}
-            <label>
-                Base Color:
+            <label
+                class={isValidColor(baseColorValue, baseColorInputMode)
+                    ? ""
+                    : "invalid"}
+            >
+                <span
+                    >Base Color: <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512"
+                        ><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                            d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
+                        /></svg
+                    ></span
+                >
                 <div class="input-select">
-                    <input
-                        type="text"
-                        bind:value={baseColorValue}
-                        {oninput}
-                        class={isValidColor(baseColorValue, baseColorInputMode)
-                            ? ""
-                            : "invalid"}
-                    />
+                    <input type="text" bind:value={baseColorValue} {oninput} />
                     <select bind:value={baseColorInputMode}>
                         <option value="hex">Hex</option>
                         <option value="rgb">RGB</option>
@@ -322,6 +337,49 @@
             >
 
             <button onclick={resetAll}>Reset <b>all</b></button>
+        {:else if settingMode === "oklch"}
+            <label>
+                L: {selectedColorSetting.baseColor.l}
+                <input
+                    type="range"
+                    bind:value={selectedColorSetting.baseColor.l}
+                    min="0"
+                    max="1"
+                    step="0.01"
+                />
+            </label>
+            <label
+                class={isValidChroma(selectedColorSetting.baseColor)
+                    ? ""
+                    : "invalid"}
+            >
+                <span
+                    >C: {selectedColorSetting.baseColor.c}<svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512"
+                        ><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path
+                            d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 472 480L40 480c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24l0 112c0 13.3 10.7 24 24 24s24-10.7 24-24l0-112c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"
+                        /></svg
+                    ></span
+                >
+                <input
+                    type="range"
+                    bind:value={selectedColorSetting.baseColor.c}
+                    min="0"
+                    max="0.33"
+                    step="0.0001"
+                />
+            </label>
+            <label>
+                H: {selectedColorSetting.baseColor.h}
+                <input
+                    type="range"
+                    bind:value={selectedColorSetting.baseColor.h}
+                    min="0"
+                    max="360"
+                    step="0.01"
+                />
+            </label>
         {/if}
     </div>
 </div>
@@ -404,6 +462,10 @@
                 }
             }
 
+            &.oklch {
+                gap: 7vmin;
+            }
+
             label {
                 width: 80cqw;
 
@@ -411,6 +473,17 @@
                 font-size: 5cqw;
 
                 color: var(--color-800);
+
+                span {
+                    svg {
+                        width: 5cqw;
+                        vertical-align: middle;
+                        fill: #a60006;
+                        margin-right: 1cqw;
+
+                        opacity: 0;
+                    }
+                }
 
                 .strike {
                     position: relative;
@@ -533,17 +606,32 @@
                         &:focus {
                             border: solid 0.1vmin var(--color-700);
                         }
-
-                        &.invalid {
-                            border: solid 0.1vmin #ff9385;
-                            color: #a60006;
-                        }
                     }
 
                     &[type="checkbox"] {
                         appearance: none;
                         height: 0;
                         width: 0;
+                    }
+                }
+
+                &.invalid {
+                    color: #a60006;
+
+                    span {
+                        svg {
+                            opacity: 1;
+                        }
+                    }
+
+                    input[type="text"] {
+                        border: solid 0.1vmin #ff9385;
+                        color: #a60006;
+                    }
+
+                    input[type="range"] {
+                        border: solid 0.1vmin #ff9385;
+                        color: #a60006;
                     }
                 }
             }

@@ -6,6 +6,20 @@ const toRgb = converter("rgb");
 const toHsl = converter("hsl");
 const withinSrgb = inGamut("rgb"); // predicate
 
+export const isValidChroma = (value: OklchColor): boolean => {
+    const { l, c, h } = value;
+    const ok = { mode: "oklch" as const, l: l > 1 ? l / 100 : l, c, h };
+    console.log(ok);
+    let rgb = toRgb(ok);
+    console.log(rgb);
+
+    if (withinSrgb(rgb)) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
 export const fallbackBasic = (basic: OklchColor, inSrgb: string, outSrgb: string): string => {
     const { l = 0, c = 0, h = 0 } = basic;
     const ok = { mode: "oklch" as const, l: l > 1 ? l / 100 : l, c, h };

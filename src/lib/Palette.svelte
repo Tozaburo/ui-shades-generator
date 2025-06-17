@@ -1,9 +1,5 @@
 <script lang="ts">
     import {
-        basicToString,
-        basicToHex,
-        basicToRgb,
-        basicToHsl,
         toBasic,
         fallbackBasic,
     } from "./colors";
@@ -36,10 +32,14 @@
     } = $derived(colorSetting);
 
     // C = C_max × √(L/100)
-    const hex = $derived(basicToHex(baseColor));
-    const basicOklch = $derived(toBasic(hex));
-    const lBase = $derived(basicOklch.l);
-    const cBase = $derived(basicOklch.c);
+
+    // Convert to hex to normalize the color
+    // const hex = $derived(basicToHex(baseColor));
+    // const basicOklch = $derived(toBasic(hex));
+
+    const lBase = $derived(Math.max(Math.min(baseColor.l, 0.999), 0.001));
+    $inspect(lBase)
+    const cBase = $derived(baseColor.c);
     const cMax = $derived(cBase / (4 * lBase * (1 - lBase)) || 0);
 
     let shades = $derived(
@@ -66,6 +66,7 @@
             const h = baseColor.h;
             const basic = { l, c, h };
 
+            // return basicToString(basic);
             return fallbackBasic(basic, outputMode, fallbackOutputMode);
         }),
     );
