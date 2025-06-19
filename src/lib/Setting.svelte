@@ -71,7 +71,7 @@
                 colorSetting.baseColor.l,
                 colorSetting.baseColor.c,
                 colorSetting.baseColor.h,
-                colorSetting.colorNum,
+                // colorSetting.colorNum,
                 colorSetting.colorName,
                 colorSetting.outputMode,
                 colorSetting.factor,
@@ -88,7 +88,7 @@
             defaultSetting.baseColor.l,
             defaultSetting.baseColor.c,
             defaultSetting.baseColor.h,
-            defaultSetting.colorNum,
+            // defaultSetting.colorNum,
             defaultSetting.colorName,
             defaultSetting.outputMode,
             defaultSetting.factor,
@@ -221,7 +221,7 @@
                     ></div>
                 </label>
             </label>
-            <label>
+            <!-- <label>
                 Number of Colors: {selectedColorSetting.colorNum}
                 <input
                     type="range"
@@ -230,7 +230,7 @@
                     max="12"
                     step="1"
                 />
-            </label>
+            </label> -->
 
             <label>
                 Color Name:

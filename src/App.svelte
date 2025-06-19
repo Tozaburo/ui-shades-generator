@@ -11,7 +11,7 @@
   let colorSettings: ColorSetting[] = $state([]);
   let selectedIndex: number = $state(0);
 
-  const CHUNK = 13;
+  const CHUNK = 12;
 
   const toNum = (v: string, d = 0) => {
     const n = Number(v);
@@ -26,16 +26,16 @@
       c: toNum(chunk[1]),
       h: toNum(chunk[2]),
     },
-    colorNum: toNum(chunk[3]),
-    colorName: chunk[4] ?? "",
-    outputMode: chunk[5] ?? "",
-    factor: toNum(chunk[6]),
-    minL: toNum(chunk[7]),
-    maxL: toNum(chunk[8]),
-    centerL: toNum(chunk[9]),
-    fallbackOutputMode: chunk[10] ?? "",
-    lightnessMode: chunk[11] === "sigmoid" ? "sigmoid" : "gamma",
-    showColorValue: toBool(chunk[12]),
+    // colorNum: toNum(chunk[3]),
+    colorName: chunk[3] ?? "",
+    outputMode: chunk[4] ?? "",
+    factor: toNum(chunk[5]),
+    minL: toNum(chunk[6]),
+    maxL: toNum(chunk[7]),
+    centerL: toNum(chunk[8]),
+    fallbackOutputMode: chunk[9] ?? "",
+    lightnessMode: chunk[10] === "sigmoid" ? "sigmoid" : "gamma",
+    showColorValue: toBool(chunk[11]),
   });
 
   export const parseSettings = (data: string) => {

@@ -7,12 +7,12 @@ type OklchColor = {
 export const originalDefaultSetting: ColorSetting = {
     baseColor: { l: 0.79, c: 0.1741, h: 155.38 },
     factor: 1.2,
-    colorNum: 9,
+    // colorNum: 9,
     colorName: "green",
     outputMode: "string",
     fallbackOutputMode: "string",
     minL: 5,
-    maxL: 98,
+    maxL: 99,
     showColorValue: false,
     lightnessMode: "sigmoid",
     centerL: 67,
@@ -23,7 +23,7 @@ export const defaultSetting: ColorSetting = { ...originalDefaultSetting };
 export type ColorSetting = {
     baseColor: OklchColor;
     factor: number;
-    colorNum: number;
+    // colorNum: number;
     colorName: string;
     outputMode: string;
     fallbackOutputMode: string;
@@ -74,7 +74,7 @@ export const isDecodedSettings = (a: unknown): a is DecodedSettings =>
 export const setDefaultSetting = (setting: ColorSetting) => {
     defaultSetting.baseColor = setting.baseColor;
     defaultSetting.factor = setting.factor;
-    defaultSetting.colorNum = setting.colorNum;
+    // defaultSetting.colorNum = setting.colorNum;
     defaultSetting.colorName = setting.colorName;
     defaultSetting.outputMode = setting.outputMode;
     defaultSetting.fallbackOutputMode = setting.fallbackOutputMode;

@@ -1,8 +1,5 @@
 <script lang="ts">
-    import {
-        toBasic,
-        fallbackBasic,
-    } from "./colors";
+    import { toBasic, fallbackBasic } from "./colors";
     import type ColorSetting from "./OklchColor";
 
     let {
@@ -19,7 +16,7 @@
 
     const {
         baseColor,
-        colorNum,
+        // colorNum,
         colorName,
         minL,
         maxL,
@@ -38,44 +35,52 @@
     // const basicOklch = $derived(toBasic(hex));
 
     const lBase = $derived(Math.max(Math.min(baseColor.l, 0.999), 0.001));
-    $inspect(lBase)
     const cBase = $derived(baseColor.c);
     const cMax = $derived(cBase / (4 * lBase * (1 - lBase)) || 0);
+    const calculationColorNum = 19;
+    const colorNum = 11;
+
+    const keepIndices = [0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 18];
 
     let shades = $derived(
-        Array.from({ length: colorNum }, (_, i) => {
-            let l: number = 0;
-            if (lightnessMode === "gamma") {
-                const t = i / (colorNum - 1);
-                l = (minL + (maxL - minL) * (1 - t ** factor)) / 100;
-            } else if (lightnessMode === "sigmoid") {
-                const t = (colorNum - i - 1) / (colorNum - 1);
-                const bias = (maxL - centerL) / (centerL - minL);
-                // const f = t ** factor / (t ** factor + (1 - t) ** factor);
-                const f = 1 / (1 + ((1 - t) / t) ** factor * bias);
-
-                l = (minL + (maxL - minL) * f) / 100;
-            }
-
-            // Best
-            const c = 4 * cMax * l * (1 - l);
-
-            // const c = cMax * Math.sin(Math.PI * l) ** 0.9;
-            // const c = cBase;
-
-            const h = baseColor.h;
-            const basic = { l, c, h };
-
-            // return basicToString(basic);
-            return fallbackBasic(basic, outputMode, fallbackOutputMode);
-        }),
+        // Array.from({ length: calculationColorNum }, (_, i) =>
+        //     formColor(i, calculationColorNum),
+        // ).filter((_, i) => keepIndices.includes(i)),
+        keepIndices.map((i) => formColor(i, calculationColorNum)),
     );
+
+    function formColor(i: number, colorNum: number) {
+        let l: number = 0;
+        if (lightnessMode === "gamma") {
+            const t = i / (colorNum - 1);
+            l = (minL + (maxL - minL) * (1 - t ** factor)) / 100;
+        } else if (lightnessMode === "sigmoid") {
+            const t = (colorNum - i - 1) / (colorNum - 1);
+            const bias = (maxL - centerL) / (centerL - minL);
+            // const f = t ** factor / (t ** factor + (1 - t) ** factor);
+            const f = 1 / (1 + ((1 - t) / t) ** factor * bias);
+
+            l = (minL + (maxL - minL) * f) / 100;
+        }
+
+        // Best
+        const c = 4 * cMax * l * (1 - l);
+
+        // const c = cMax * Math.sin(Math.PI * l) ** 0.9;
+        // const c = cBase;
+
+        const h = baseColor.h;
+        const basic = { l, c, h };
+
+        // return basicToString(basic);
+        return fallbackBasic(basic, outputMode, fallbackOutputMode);
+    }
 
     let cssCode = $derived(
         shades
             .map((shade, index) => {
                 const basic = toBasic(shade);
-                return `--${colorName}-${index * 100 + 100}: ${shade};`;
+                return `--${colorName}-${keepIndices[index] * 50 + 50}: ${shade};`;
             })
             .join("\n"),
     );
@@ -107,7 +112,7 @@
             if (root) {
                 shades.forEach((shade, index) => {
                     root.style.setProperty(
-                        `--color-${index * 100 + 100}`,
+                        `--color-${keepIndices[index] * 50 + 50}`,
                         shade,
                     );
                 });
