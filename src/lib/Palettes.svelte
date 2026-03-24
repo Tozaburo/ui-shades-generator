@@ -1,11 +1,11 @@
 <script lang="ts">
     import Palette from "./Palette.svelte";
-    import { defaultSetting } from "./defaultSetting";
+    import { cloneColorSetting, defaultSetting } from "./defaultSetting";
 
     let { colorSettings = $bindable(), selectedIndex = $bindable() } = $props();
 
     function onclick() {
-        colorSettings = [...colorSettings, defaultSetting];
+        colorSettings = [...colorSettings, cloneColorSetting(defaultSetting)];
         selectedIndex = colorSettings.length - 1;
     }
 </script>

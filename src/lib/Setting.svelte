@@ -9,6 +9,7 @@
         isValidChroma,
     } from "./colors";
     import {
+        cloneColorSetting,
         defaultSetting,
         setDefaultSetting,
         originalDefaultSetting,
@@ -81,6 +82,7 @@
                 colorSetting.fallbackOutputMode,
                 colorSetting.lightnessMode,
                 colorSetting.showColorValue,
+                colorSetting.shadeMode,
             ],
         );
 
@@ -98,6 +100,7 @@
             defaultSetting.fallbackOutputMode,
             defaultSetting.lightnessMode,
             defaultSetting.showColorValue,
+            defaultSetting.shadeMode,
         ];
 
         const data: string = [...defaultSettingData, ...settingsData]
@@ -129,7 +132,7 @@
     }
 
     function resetThisSetting() {
-        selectedColorSetting = defaultSetting;
+        selectedColorSetting = cloneColorSetting(defaultSetting);
     }
 
     function resetDefaultSetting() {
@@ -139,7 +142,7 @@
 
     function resetAll() {
         setDefaultSetting(originalDefaultSetting);
-        colorSettings = [defaultSetting];
+        colorSettings = [cloneColorSetting(defaultSetting)];
         selectedIndex = 0;
         updateParams();
     }
@@ -247,6 +250,14 @@
                     <option value="rgb">RGB</option>
                     <option value="hsl">HSL</option>
                     <option value="string">OKLCH</option>
+                </select>
+            </label>
+
+            <label>
+                Shade Mode:
+                <select bind:value={selectedColorSetting.shadeMode}>
+                    <option value={11}>11 colors</option>
+                    <option value={19}>19 colors</option>
                 </select>
             </label>
 

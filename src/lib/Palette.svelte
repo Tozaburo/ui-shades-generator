@@ -1,6 +1,6 @@
 <script lang="ts">
     import { toBasic, fallbackBasic } from "./colors";
-    import type ColorSetting from "./OklchColor";
+    import type { ColorSetting } from "./defaultSetting";
 
     let {
         colorSetting,
@@ -26,6 +26,7 @@
         showColorValue,
         lightnessMode,
         centerL,
+        shadeMode,
     } = $derived(colorSetting);
 
     // C = C_max × √(L/100)
@@ -38,16 +39,18 @@
     const cBase = $derived(baseColor.c);
     const cMax = $derived(cBase / (4 * lBase * (1 - lBase)) || 0);
     const calculationColorNum = 19;
-    const colorNum = 11;
-
-    const keepIndices = [0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 18];
-
-    let shades = $derived(
-        // Array.from({ length: calculationColorNum }, (_, i) =>
-        //     formColor(i, calculationColorNum),
-        // ).filter((_, i) => keepIndices.includes(i)),
-        keepIndices.map((i) => formColor(i, calculationColorNum)),
+    const mode11Indices = [0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 18];
+    const mode19Indices = Array.from(
+        { length: calculationColorNum },
+        (_, i) => i,
     );
+    const allShadeSteps = mode19Indices.map((i) => i * 50 + 50);
+    const activeIndices = $derived(
+        shadeMode === 19 ? mode19Indices : mode11Indices,
+    );
+    const activeShadeSteps = $derived(activeIndices.map((i) => i * 50 + 50));
+
+    let shades = $derived(activeIndices.map((i) => formColor(i, calculationColorNum)));
 
     function formColor(i: number, colorNum: number) {
         let l: number = 0;
@@ -78,10 +81,7 @@
 
     let cssCode = $derived(
         shades
-            .map((shade, index) => {
-                const basic = toBasic(shade);
-                return `--${colorName}-${keepIndices[index] * 50 + 50}: ${shade};`;
-            })
+            .map((shade, index) => `--${colorName}-${activeShadeSteps[index]}: ${shade};`)
             .join("\n"),
     );
 
@@ -110,9 +110,12 @@
         if (isSelected) {
             const root = document.querySelector(":root") as HTMLElement;
             if (root) {
+                allShadeSteps.forEach((step) => {
+                    root.style.removeProperty(`--color-${step}`);
+                });
                 shades.forEach((shade, index) => {
                     root.style.setProperty(
-                        `--color-${keepIndices[index] * 50 + 50}`,
+                        `--color-${activeShadeSteps[index]}`,
                         shade,
                     );
                 });
@@ -129,7 +132,7 @@
             <div
                 class="shade"
                 style:background-color={shade}
-                style:width={100 / colorNum + "%"}
+                style:width={100 / shades.length + "%"}
                 onclick={() => copyToClipboard(shade)}
             >
                 {#if showColorValue}

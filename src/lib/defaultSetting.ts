@@ -4,6 +4,8 @@ type OklchColor = {
     h: number;
 };
 
+export type ShadeMode = 11 | 19;
+
 export const originalDefaultSetting: ColorSetting = {
     baseColor: { l: 0.79, c: 0.1741, h: 155.38 },
     factor: 1.2,
@@ -16,9 +18,30 @@ export const originalDefaultSetting: ColorSetting = {
     showColorValue: false,
     lightnessMode: "sigmoid",
     centerL: 67,
+    shadeMode: 11,
 };
 
-export const defaultSetting: ColorSetting = { ...originalDefaultSetting };
+export const cloneColorSetting = (setting: ColorSetting): ColorSetting => ({
+    baseColor: {
+        l: setting.baseColor.l,
+        c: setting.baseColor.c,
+        h: setting.baseColor.h,
+    },
+    factor: setting.factor,
+    colorName: setting.colorName,
+    outputMode: setting.outputMode,
+    fallbackOutputMode: setting.fallbackOutputMode,
+    minL: setting.minL,
+    maxL: setting.maxL,
+    showColorValue: setting.showColorValue,
+    lightnessMode: setting.lightnessMode,
+    centerL: setting.centerL,
+    shadeMode: setting.shadeMode,
+});
+
+export const defaultSetting: ColorSetting = cloneColorSetting(
+    originalDefaultSetting,
+);
 
 export type ColorSetting = {
     baseColor: OklchColor;
@@ -32,6 +55,7 @@ export type ColorSetting = {
     showColorValue: boolean;
     lightnessMode: "gamma" | "sigmoid";
     centerL: number;
+    shadeMode: ShadeMode;
 };
 
 export type DecodedSettings = {
@@ -55,7 +79,6 @@ const isColorSetting = (v: unknown): v is ColorSetting =>
     isObject(v) &&
     isOklchColor(v.baseColor) &&
     isNumber(v.factor) &&
-    isNumber(v.colorNum) &&
     isString(v.colorName) &&
     isString(v.outputMode) &&
     isString(v.fallbackOutputMode) &&
@@ -63,7 +86,8 @@ const isColorSetting = (v: unknown): v is ColorSetting =>
     isNumber(v.maxL) &&
     typeof v.showColorValue === "boolean" &&
     (v.lightnessMode === "gamma" || v.lightnessMode === "sigmoid") &&
-    isNumber(v.centerL);
+    isNumber(v.centerL) &&
+    (v.shadeMode === 11 || v.shadeMode === 19);
 
 export const isDecodedSettings = (a: unknown): a is DecodedSettings =>
     isObject(a) &&
@@ -72,15 +96,5 @@ export const isDecodedSettings = (a: unknown): a is DecodedSettings =>
     isColorSetting(a.defaultSetting);
 
 export const setDefaultSetting = (setting: ColorSetting) => {
-    defaultSetting.baseColor = setting.baseColor;
-    defaultSetting.factor = setting.factor;
-    // defaultSetting.colorNum = setting.colorNum;
-    defaultSetting.colorName = setting.colorName;
-    defaultSetting.outputMode = setting.outputMode;
-    defaultSetting.fallbackOutputMode = setting.fallbackOutputMode;
-    defaultSetting.minL = setting.minL;
-    defaultSetting.maxL = setting.maxL;
-    defaultSetting.showColorValue = setting.showColorValue;
-    defaultSetting.lightnessMode = setting.lightnessMode;
-    defaultSetting.centerL = setting.centerL;
-}
+    Object.assign(defaultSetting, cloneColorSetting(setting));
+};

@@ -2,16 +2,17 @@
   import Palettes from "./lib/Palettes.svelte";
   import Setting from "./lib/Setting.svelte";
   import {
+    cloneColorSetting,
     defaultSetting,
-    isDecodedSettings,
     setDefaultSetting,
   } from "./lib/defaultSetting";
-  import type { ColorSetting, DecodedSettings } from "./lib/defaultSetting";
+  import type { ColorSetting, ShadeMode } from "./lib/defaultSetting";
 
   let colorSettings: ColorSetting[] = $state([]);
   let selectedIndex: number = $state(0);
 
-  const CHUNK = 12;
+  const LEGACY_CHUNK = 12;
+  const CURRENT_CHUNK = 13;
 
   const toNum = (v: string, d = 0) => {
     const n = Number(v);
@@ -20,7 +21,16 @@
 
   const toBool = (v: string) => /^true$/i.test(v);
 
-  const buildSetting = (chunk: string[]): ColorSetting => ({
+  const toShadeMode = (v: string | undefined): ShadeMode =>
+    v === "19" ? 19 : 11;
+
+  const isShadeModeToken = (v: string | undefined): boolean =>
+    v === "11" || v === "19";
+
+  const buildSetting = (
+    chunk: string[],
+    includeShadeMode: boolean,
+  ): ColorSetting => ({
     baseColor: {
       l: toNum(chunk[0]),
       c: toNum(chunk[1]),
@@ -36,25 +46,62 @@
     fallbackOutputMode: chunk[9] ?? "",
     lightnessMode: chunk[10] === "sigmoid" ? "sigmoid" : "gamma",
     showColorValue: toBool(chunk[11]),
+    shadeMode: includeShadeMode ? toShadeMode(chunk[12]) : 11,
   });
+
+  const parseByChunk = (
+    values: string[],
+    chunkSize: number,
+    includeShadeMode: boolean,
+  ) => {
+    const parsedDefaultSetting = buildSetting(
+      values.slice(0, chunkSize),
+      includeShadeMode,
+    );
+    const parsedColorSettings: ColorSetting[] = [];
+
+    for (let i = chunkSize; i < values.length; i += chunkSize) {
+      const slice = values.slice(i, i + chunkSize);
+      if (slice.length === chunkSize) {
+        parsedColorSettings.push(buildSetting(slice, includeShadeMode));
+      }
+    }
+
+    return {
+      defaultSetting: parsedDefaultSetting,
+      colorSettings: parsedColorSettings,
+    };
+  };
+
+  const hasValidShadeModes = (values: string[]) => {
+    for (let i = CURRENT_CHUNK - 1; i < values.length; i += CURRENT_CHUNK) {
+      if (!isShadeModeToken(values[i])) return false;
+    }
+    return true;
+  };
 
   export const parseSettings = (data: string) => {
     if (typeof data !== "string")
       return { defaultSetting: null, colorSettings: [] };
 
     const values = data.split(",");
-    if (values.length < CHUNK || values.length % CHUNK !== 0)
-      return { defaultSetting: null, colorSettings: [] };
 
-    const defaultSetting = buildSetting(values.slice(0, CHUNK));
-    const colorSettings = [];
+    const isCurrentFormat =
+      values.length >= CURRENT_CHUNK &&
+      values.length % CURRENT_CHUNK === 0 &&
+      hasValidShadeModes(values);
 
-    for (let i = CHUNK; i < values.length; i += CHUNK) {
-      const slice = values.slice(i, i + CHUNK);
-      if (slice.length === CHUNK) colorSettings.push(buildSetting(slice));
+    if (isCurrentFormat) {
+      return parseByChunk(values, CURRENT_CHUNK, true);
     }
 
-    return { defaultSetting, colorSettings };
+    const isLegacyFormat =
+      values.length >= LEGACY_CHUNK && values.length % LEGACY_CHUNK === 0;
+    if (isLegacyFormat) {
+      return parseByChunk(values, LEGACY_CHUNK, false);
+    }
+
+    return { defaultSetting: null, colorSettings: [] };
   };
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -65,14 +112,14 @@
 
     const { defaultSetting: _defaultSetting, colorSettings: _colorSettings } = parseSettings(data);
 
-    if (_defaultSetting && _colorSettings) {
+    if (_defaultSetting && _colorSettings.length > 0) {
       colorSettings = _colorSettings;
       setDefaultSetting(_defaultSetting);
     } else {
-      colorSettings = [defaultSetting];
+      colorSettings = [cloneColorSetting(defaultSetting)];
     }
   } catch (e) {
-    colorSettings = [defaultSetting];
+    colorSettings = [cloneColorSetting(defaultSetting)];
   }
 </script>
 
